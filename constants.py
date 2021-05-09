@@ -1,13 +1,13 @@
 import regex as re
 
 NUMBERS_PATTERN = r"first|second|third|fourth|fifth|sixth|seventh|eighth|nineth|tenth"
-POSITIONNAL_TOKENS = r"next|last"
+POSITIONNAL_TOKENS = r"next|last|previous"
 DIGITS_PATTERN = r"\d+"
 DIGITS_SUFFIXES = r"st|th|rd|nd"
 DAYS_PATTERN = "monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thur|thurs|fri|sat|sun"
 MONTHS_PATTERN = r"january|february|march|april|may|june|july|august|september|october|november|december" \
                  r"|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre" \
-                 r"|jan\.?|ene\.?|feb\.?|mar\.?|apr\.?|abr\.?|may\.?|jun\.?|jul\.?|aug\.?|ago\.?" \
+                 r"|jan\.?|ene\.?|feb\.?|mar\.?|apr\.?|abr\.?|may\.?|jun\.?|jul\.?|aug\.?" \
                  r"|sep\.?|sept\.?|oct\.?|nov\.?|dec\.?|dic\.?"
 
 TIMEZONES_PATTERN = "ACDT|ACST|ACT|ACWDT|ACWST|ADDT|ADMT|ADT|AEDT|AEST|AFT|AHDT|AHST|AKDT|AKST|" \
@@ -59,68 +59,120 @@ YYYYMMDDHHMMSS_PATTERN = "|".join(
         for mon in range(1, 13)
     ]
 )
-ISO8601_PATTERN = r"(?P<years>-?(\:[1-9][0-9]*)?[0-9]{4})\-(?P<months>1[0-2]|0[1-9])\-(?P<days>3" \
-                  r"[01]|0[1-9]|[12][0-9])T(?P<hours>2[0-3]|[01][0-9])\:(?P<minutes>[0-5][0-9]):" \
-                  r"(?P<seconds>[0-5][0-9])(?:[\.,]+(?P<microseconds>[0-9]+))?(?P<offset>(?:Z|[+-]" \
-                  r"(?:2[0-3]|[01][0-9])\:[0-5][0-9]))?"
+# ISO8601_PATTERN = r"(?P<years>-?(\:[1-9][0-9]*)?[0-9]{4})\-(?P<months>1[0-2]|0[1-9])\-(?P<days>3" \
+#                   r"[01]|0[1-9]|[12][0-9])T(?P<hours>2[0-3]|[01][0-9])\:(?P<minutes>[0-5][0-9]):" \
+#                   r"(?P<seconds>[0-5][0-9])(?:[\.,]+(?P<microseconds>[0-9]+))?(?P<offset>(?:Z|[+-]" \
+#                   r"(?:2[0-3]|[01][0-9])\:[0-5][0-9]))?"
+
+# UNDELIMITED_STAMPS_PATTERN = "|".join(
+#     [YYYYMMDDHHMMSS_PATTERN, YYYYMMDD_PATTERN, YYYYMM_PATTERN, ISO8601_PATTERN]
+# )
 
 UNDELIMITED_STAMPS_PATTERN = "|".join(
-    [YYYYMMDDHHMMSS_PATTERN, YYYYMMDD_PATTERN, YYYYMM_PATTERN, ISO8601_PATTERN]
+    [YYYYMMDDHHMMSS_PATTERN, YYYYMMDD_PATTERN, YYYYMM_PATTERN]
 )
 
 DELIMITERS_PATTERN = r"[/\:\-\,\.\s\_\+\@]+"
-TIME_PERIOD_PATTERN = r"a\.m\.|am|p\.m\.|pm"
+# TIME_PERIOD_PATTERN = r"a\.m\.|am|p\.m\.|pm"
 
 # can be in date strings but not recognized by dateutils  ## commented by Jun
 # EXTRA_TOKENS_PATTERN = r"due|by|on|during|standard|daylight|savings|time|date|dated|of|
 # to|through|between|until|at|day"
-EXTRA_TOKENS_PATTERN = r"time|date|dated|day|month|year"
+EXTRA_TOKENS_PATTERN = r"time|date|dated|days|months|quarters|years"
 
 # TODO: Get english numbers?
 # http://www.rexegg.com/regex-trick-numbers-in-english.html
 
-RELATIVE_PATTERN = "before|after|next|last|ago"
+# RELATIVE_PATTERN = "before|after|next|last"
+# Jun modification
+RELATIVE_PATTERN = ""
 TIME_SHORTHAND_PATTERN = "noon|midnight|today|yesterday"
-UNIT_PATTERN = "second|minute|hour|day|week|month|year"
+# UNIT_PATTERN = "second|minute|hour|day|week|month|quarter|year"
 
 # Time pattern is used independently, so specified here.
-TIME_PATTERN = r"""
-(?P<time>
-    ## Captures in format XX:YY(:ZZ) (PM) (EST)
-    (
-        (?P<hours>\d{{1,2}})
-        \:
-        (?P<minutes>\d{{1,2}})
-        (\:(?<seconds>\d{{1,2}}))?
-        ([\.\,](?<microseconds>\d{{1,6}}))?
-        \s*
-        (?P<time_periods>{time_periods})?
-        \s*
-        (?P<timezones>{timezones})?
-    )
-    |
-    ## Captures in format 11 AM (EST)
-    ## Note with single digit capture requires time period
-    (
-        (?P<hours>\d{{1,2}})
-        \s*
-        (?P<time_periods>{time_periods})
-        \s*
-        (?P<timezones>{timezones})*
-    )
-)
-""".format(
-    time_periods=TIME_PERIOD_PATTERN, timezones=ALL_TIMEZONES_PATTERN
-)
+# TIME_PATTERN = r"""
+# (?P<time>
+#     ## Captures in format XX:YY(:ZZ) (PM) (EST)
+#     (
+#         (?P<hours>\d{{1,2}})
+#         \:
+#         (?P<minutes>\d{{1,2}})
+#         (\:(?<seconds>\d{{1,2}}))?
+#         ([\.\,](?<microseconds>\d{{1,6}}))?
+#         \s*
+#         (?P<time_periods>{time_periods})?
+#         \s*
+#         (?P<timezones>{timezones})?
+#     )
+#     |
+#     ## Captures in format 11 AM (EST)
+#     ## Note with single digit capture requires time period
+#     (
+#         (?P<hours>\d{{1,2}})
+#         \s*
+#         (?P<time_periods>{time_periods})
+#         \s*
+#         (?P<timezones>{timezones})*
+#     )
+# )
+# """.format(
+#     time_periods=TIME_PERIOD_PATTERN, timezones=ALL_TIMEZONES_PATTERN
+# )
+
+# DATES_PATTERN = """
+# (
+#     ## Undelimited datestamps (treated independently)
+#     (?P<undelimited_stamps>{undelimited_stamps})
+#     |
+#     (
+#         {time}
+#         |
+#         ## Grab any four digit years
+#         (?P<years>{years})
+#         |
+#         ## Numbers
+#         (?P<numbers>{numbers})
+#         ## Grab any digits
+#         |
+#         (?P<digits>{digits})(?P<digits_suffixes>{digits_suffixes})?
+#         |
+#         (?P<days>{days})
+#         |
+#         (?P<months>{months})
+#         |
+#         ## Delimiters, ie Tuesday[,] July 18 or 6[/]17[/]2008
+#         ## as well as whitespace
+#         (?P<delimiters>{delimiters})
+#         |
+#         (?P<positionnal_tokens>{positionnal_tokens})
+#         |
+#         ## These tokens could be in phrases that dateutil does not yet recognize
+#         ## Some are US Centric
+#         (?P<extra_tokens>{extra_tokens})
+#     ## We need at least three items to match for minimal datetime parsing
+#     ## ie 10pm
+#     ){{1,1}}
+# )
+# """
+
+# DATES_PATTERN = DATES_PATTERN.format(
+#     time=TIME_PATTERN,
+#     undelimited_stamps=UNDELIMITED_STAMPS_PATTERN,
+#     years=YYYY_PATTERN,
+#     numbers=NUMBERS_PATTERN,
+#     digits=DIGITS_PATTERN,
+#     digits_suffixes=DIGITS_SUFFIXES,
+#     days=DAYS_PATTERN,
+#     months=MONTHS_PATTERN,
+#     delimiters=DELIMITERS_PATTERN,
+#     positionnal_tokens=POSITIONNAL_TOKENS,
+#     extra_tokens=EXTRA_TOKENS_PATTERN,
+# )
 
 DATES_PATTERN = """
 (
     ## Undelimited datestamps (treated independently)
-    (?P<undelimited_stamps>{undelimited_stamps})
-    |
     (
-        {time}
-        |
         ## Grab any four digit years
         (?P<years>{years})
         |
@@ -150,8 +202,6 @@ DATES_PATTERN = """
 """
 
 DATES_PATTERN = DATES_PATTERN.format(
-    time=TIME_PATTERN,
-    undelimited_stamps=UNDELIMITED_STAMPS_PATTERN,
     years=YYYY_PATTERN,
     numbers=NUMBERS_PATTERN,
     digits=DIGITS_PATTERN,
@@ -172,9 +222,9 @@ DATE_REGEX = re.compile(
     DATES_PATTERN, re.IGNORECASE | re.MULTILINE | re.UNICODE | re.DOTALL | re.VERBOSE
 )
 
-TIME_REGEX = re.compile(
-    TIME_PATTERN, re.IGNORECASE | re.MULTILINE | re.UNICODE | re.DOTALL | re.VERBOSE
-)
+# TIME_REGEX = re.compile(
+#     TIME_PATTERN, re.IGNORECASE | re.MULTILINE | re.UNICODE | re.DOTALL | re.VERBOSE
+# )
 
 # These tokens can be in original text but dateutil
 # won't handle them without modification

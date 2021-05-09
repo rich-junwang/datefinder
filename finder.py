@@ -339,7 +339,7 @@ def find_dates(
     date_finder = DateFinder(base_date=base_date, first=first)
     return date_finder.find_dates(text, source=source, index=index, strict=strict)
 
-
-def extract_time_spans(text, strict=False, base_date=None, first="month"):
-    date_finder = DateFinder(base_date=base_date, first=first)
-    return date_finder.extract_date_strings(text, strict=strict)
+#
+# def extract_time_spans(text, strict=False, base_date=None, first="month"):
+#     date_finder = DateFinder(base_date=base_date, first=first)
+#     return date_finder.extract_date_strings(text, strict=strict)
